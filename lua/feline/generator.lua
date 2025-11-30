@@ -25,7 +25,8 @@ end
 -- If highlight is a string, use it as highlight name and
 -- extract the properties from the highlight
 local function get_hl_properties(hlname)
-    local hl = api.nvim_get_hl_by_name(hlname, true)
+    local opts = { name = hlname, link = false }
+    local hl = api.nvim_get_hl(0, opts)
     local styles = {}
 
     for k, v in ipairs(hl) do
@@ -36,8 +37,8 @@ local function get_hl_properties(hlname)
 
     return {
         name = hlname,
-        fg = hl.foreground and string.format('#%06x', hl.foreground),
-        bg = hl.background and string.format('#%06x', hl.background),
+        fg = hl.fg and string.format('#%06x', hl.fg),
+        bg = hl.bg and string.format('#%06x', hl.bg),
         style = next(styles) and table.concat(styles, ',') or 'NONE',
     }
 end
@@ -116,11 +117,13 @@ local function is_disabled(gen)
 end
 
 -- Parse highlight table, inherit default/parent values if values are not given
-local function parse_hl(hl, parent_hl)
+local function parse_hl(hl, parent_hl, gen)
     parent_hl = parent_hl or {}
+    local gen_fg = gen and gen.name ~= 'statusline' and gen.config.theme and gen.config.theme.fg
+    local gen_bg = gen and gen.name ~= 'statusline' and gen.config.theme and gen.config.theme.bg
 
-    local fg = hl.fg or parent_hl.fg or feline.colors.fg
-    local bg = hl.bg or parent_hl.bg or feline.colors.bg
+    local fg = hl.fg or parent_hl.fg or gen_fg or feline.colors.fg
+    local bg = hl.bg or parent_hl.bg or gen_bg or feline.colors.bg
     local style = hl.style or parent_hl.style or 'NONE'
 
     if feline.colors[fg] then
@@ -131,6 +134,7 @@ local function parse_hl(hl, parent_hl)
     end
 
     return {
+        name = hl.name,
         fg = fg,
         bg = bg,
         style = style,
@@ -429,7 +433,7 @@ local function parse_component(gen, component, use_short_provider, winid, sectio
     else
         -- If highlight is a table, parse the highlight so it can be passed to
         -- parse_sep_list and parse_icon
-        hl = parse_hl(hl)
+        hl = parse_hl(hl, nil, gen)
     end
 
     local provider, str, icon
@@ -460,7 +464,15 @@ local function parse_component(gen, component, use_short_provider, winid, sectio
 
     local right_sep_str = parse_sep_list(gen, component.right_sep, hl.bg, is_component_empty)
 
-    icon = parse_icon(gen, component.icon or icon, hl, is_component_empty)
+    if component.icon then
+        if type(component.icon) == 'table' and type(icon) == 'table' then
+            icon = vim.tbl_deep_extend('keep', component.icon, icon)
+        else
+            icon = component.icon
+        end
+    end
+
+    icon = parse_icon(gen, icon, hl, is_component_empty)
 
     return string.format(
         '%s%s%%#%s#%s%s',
@@ -614,7 +626,7 @@ function Generator:generate(is_active, maxwidth)
     end
 
     -- If statusline width is greater than maxwidth, begin the truncation process
-    if statusline_width > maxwidth then
+    if maxwidth and statusline_width > maxwidth then
         -- First, sort the component indices in ascending order of the priority of the components
         -- that the indices refer to
         table.sort(component_indices, function(first, second)
@@ -669,7 +681,7 @@ function Generator:generate(is_active, maxwidth)
 
     -- If statusline still doesn't fit within window, remove components with truncate_hide set to
     -- true until it does
-    if statusline_width > maxwidth then
+    if maxwidth and statusline_width > maxwidth then
         for _, indices in ipairs(component_indices) do
             local section, number = indices[1], indices[2]
             local component = sections[section][number]

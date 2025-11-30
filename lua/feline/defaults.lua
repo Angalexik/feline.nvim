@@ -43,6 +43,7 @@ return {
             default_value = {
                 ['NORMAL'] = 'green',
                 ['OP'] = 'green',
+                ['CONFIRM'] = 'orange',
                 ['INSERT'] = 'red',
                 ['VISUAL'] = 'skyblue',
                 ['LINES'] = 'skyblue',
@@ -101,6 +102,30 @@ return {
         },
     },
     winbar = {
+        theme = {
+            type = { 'table', 'string' },
+            default_value = 'default',
+        },
+        force_inactive = {
+            type = 'table',
+            default_value = {},
+        },
+        disable = {
+            type = 'table',
+            default_value = {},
+        },
+        components = {
+            type = 'table',
+        },
+        conditional_components = {
+            type = 'table',
+        },
+    },
+    statuscolumn = {
+        theme = {
+            type = { 'table', 'string' },
+            default_value = 'default',
+        },
         force_inactive = {
             type = 'table',
             default_value = {},

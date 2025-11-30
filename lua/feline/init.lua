@@ -1,11 +1,8 @@
 local api = vim.api
 
--- Check if Neovim version is 0.7 or greater
-if vim.fn.has('nvim-0.7') ~= 1 then
-    api.nvim_err_writeln(
-        'Feline is only available for Neovim versions 0.7 and above. For Neovim 0.5'
-            .. 'compatibility, use the 0.5-compat branch'
-    )
+-- Check if Neovim version is 0.9 or greater
+if vim.fn.has('nvim-0.9') ~= 1 then
+    api.nvim_err_writeln('Feline is only available for Neovim versions 0.9 and above.')
     return
 end
 
@@ -13,10 +10,11 @@ local utils = require('feline.utils')
 local defaults = require('feline.defaults')
 local themes = utils.lazy_require('feline.themes')
 local Generator = utils.lazy_require('feline.generator')
-local gen, winbar_gen
+local gen, winbar_gen, statuscolumn_gen
 
 local M = {}
 M.winbar = {}
+M.statuscolumn = {}
 
 -- Clear all highlights created by Feline and remove them from cache
 function M.reset_highlights()
@@ -26,38 +24,41 @@ function M.reset_highlights()
     if winbar_gen then
         winbar_gen:reset_highlights()
     end
+    if statuscolumn_gen then
+        statuscolumn_gen:reset_highlights()
+    end
 end
 
+-- Add a Feline color theme
+function M.add_theme(name, value)
+    themes[name] = value
+end
+
+function M.winbar.use_theme(name_or_tbl)
+    if not winbar_gen then
+        return
+    end
+    utils._use_theme(themes, name_or_tbl, function(colors)
+        winbar_gen.config.theme = colors
+        M.reset_highlights()
+    end)
+end
+
+function M.statuscolumn.use_theme(name_or_tbl)
+    if not statuscolumn_gen then
+        return
+    end
+    utils._use_theme(themes, name_or_tbl, function(colors)
+        statuscolumn_gen.config.theme = colors
+        M.reset_highlights()
+    end)
+end
 -- Use a theme (can be either a string containing theme name or a table containing theme colors)
 function M.use_theme(name_or_tbl)
-    local theme_colors
-
-    if type(name_or_tbl) == 'string' then
-        if not themes[name_or_tbl] then
-            api.nvim_err_writeln(string.format("Theme '%s' not found!", name_or_tbl))
-            return
-        end
-
-        theme_colors = themes[name_or_tbl]
-    else
-        theme_colors = name_or_tbl
-    end
-
-    local colors = {}
-
-    -- To make sure Feline falls back to default theme for missing colors, first iterate through the
-    -- default colors and put their values in the colors table, and then iterate through the
-    -- theme colors to update the default values
-    for k, v in pairs(themes.default) do
-        colors[k] = v
-    end
-
-    for k, v in pairs(theme_colors) do
-        colors[k] = v
-    end
-
-    M.colors = colors
-    M.reset_highlights()
+    utils._use_theme(themes, name_or_tbl, function(colors)
+        M.colors = colors
+        M.reset_highlights()
+    end)
 end
 
 -- Check if component with `name` in the statusline of window `winid` is truncated or hidden
@@ -127,12 +128,15 @@ local function setup_global_config(config)
     end
 end
 
-local function setup_common(config, is_winbar)
+local function setup_common(config, is_winbar, is_statuscolumn)
     local module
 
     if is_winbar then
         M.winbar_module = {}
         module = M.winbar_module
+    elseif is_statuscolumn then
+        M.statuscolumn_module = {}
+        module = M.statuscolumn_module
     else
         M.statusline_module = {}
         module = M.statusline_module
@@ -140,6 +144,7 @@ local function setup_common(config, is_winbar)
 
     module.force_inactive = config.force_inactive
     module.disable = config.disable
+    module.theme = config.theme
 
     -- If components table is provided, use it, else use the default
     if config.components then
@@ -152,6 +157,12 @@ local function setup_common(config, is_winbar)
                 module.components = require('feline.default_components').winbar.icons
             else
                 module.components = require('feline.default_components').winbar.noicons
+            end
+        elseif is_statuscolumn then
+            if use_icons then
+                module.components = require('feline.default_components').statuscolumn.icons
+            else
+                module.components = require('feline.default_components').statuscolumn.noicons
             end
         else
             if use_icons then
@@ -167,7 +178,7 @@ end
 
 function M.setup(config)
     -- Check if termguicolors is enabled
-    if not vim.o.termguicolors then
+    if not vim.o.termguicolors and vim.version().minor < 10 then
         api.nvim_err_writeln(
             "Feline needs 'termguicolors' to be enabled to work properly\n"
                 .. "Please do `:help 'termguicolors'` in Neovim for more information"
@@ -179,7 +190,7 @@ function M.setup(config)
     config = utils.parse_config(config, defaults.statusline)
 
     setup_global_config(config)
-    setup_common(config, false)
+    setup_common(config, false, false)
 
     -- Create the generator if it doesn't exist, clear the generator if it does
     if not gen then
@@ -195,7 +206,7 @@ end
 
 function M.winbar.setup(config)
     config = utils.parse_config(config, defaults.winbar)
-    setup_common(config, true)
+    setup_common(config, true, false)
 
     -- Create the generator if it doesn't exist, clear the generator if it does
     if not winbar_gen then
@@ -205,6 +216,20 @@ function M.winbar.setup(config)
     end
 
     vim.o.winbar = "%{%v:lua.require'feline'.generate_winbar()%}"
+end
+
+function M.statuscolumn.setup(config)
+    config = utils.parse_config(config, defaults.statuscolumn)
+    setup_common(config, false, true)
+
+    -- Create the generator if it doesn't exist
+    if not statuscolumn_gen then
+        statuscolumn_gen = Generator.new('statuscolumn', M.statuscolumn_module)
+    else
+        statuscolumn_gen:clear_state()
+    end
+
+    vim.o.statuscolumn = "%{%v:lua.require'feline'.generate_statuscolumn()%}"
 end
 
 function M.generate_statusline()
@@ -227,6 +252,12 @@ function M.generate_winbar()
     local maxwidth = api.nvim_win_get_width(0)
 
     return winbar_gen:generate(is_active, maxwidth)
+end
+
+function M.generate_statuscolumn()
+    local is_active = api.nvim_get_current_win() == tonumber(vim.g.actual_curwin)
+
+    return statuscolumn_gen:generate(is_active, nil)
 end
 
 return M
