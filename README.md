@@ -1,27 +1,13 @@
 # feline.nvim
 
-![GitHub last commit (branch)](https://img.shields.io/github/last-commit/freddiehaddad/feline.nvim/main?style=for-the-badge)
-![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/freddiehaddad/feline.nvim?style=for-the-badge)
-![GitHub issues](https://img.shields.io/github/issues/freddiehaddad/feline.nvim?style=for-the-badge)
-![GitHub Discussions](https://img.shields.io/github/discussions/freddiehaddad/feline.nvim?style=for-the-badge)
-![GitHub Repo stars](https://img.shields.io/github/stars/freddiehaddad/feline.nvim?style=for-the-badge)
+![GitHub last commit (branch)](https://img.shields.io/github/last-commit/Angalexik/feline.nvim/main?style=for-the-badge)
+![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/Angalexik/feline.nvim?style=for-the-badge)
+![GitHub issues](https://img.shields.io/github/issues/Angalexik/feline.nvim?style=for-the-badge)
+![GitHub Discussions](https://img.shields.io/github/discussions/Angalexik/feline.nvim?style=for-the-badge)
+![GitHub Repo stars](https://img.shields.io/github/stars/Angalexik/feline.nvim?style=for-the-badge)
 
 A minimal, stylish and customizable statusline, statuscolumn, and winbar for
 Neovim
-
-Active Window
-![scrn-2023-11-02-05-54-47](https://github.com/freddiehaddad/feline.nvim/assets/6127369/e2dbda10-b9de-446f-9236-20896cf1fa98)
-
-Active Window with macro and search indicators
-![scrn-2023-11-02-05-58-19](https://github.com/freddiehaddad/feline.nvim/assets/6127369/4bc4edf5-3613-428a-891c-2a111b46df6b)
-
-Inactive Window
-![scrn-2023-11-02-05-55-10](https://github.com/freddiehaddad/feline.nvim/assets/6127369/48e0fb94-542a-47f3-b965-7a8482615e67)
-
-Neovim, Feline and matching Tmux Theme
-![scrn-2023-11-02-06-03-05](https://github.com/freddiehaddad/feline.nvim/assets/6127369/80c8ee6a-40c5-43ff-8122-9b0f029182c3)
-
-Configuration can be found in the following [repo] within [feline.lua].
 
 ## About
 
@@ -73,24 +59,18 @@ repository is the plugins new home as per
 
 ## Installation
 
-This plugin is available on [LuaRocks]:
-
-```text
-:Rocks install feline.nvim
-```
-
 [lazy.nvim]
 
 ```lua
 -- default
 {
-    'freddiehaddad/feline.nvim',
+    'Angalexik/feline.nvim',
     opts = {}
 }
 
 -- with extras
 {
-    'freddiehaddad/feline.nvim',
+    'Angalexik/feline.nvim',
     opts = {},
     config = function(_, opts)
         require('feline').setup()
@@ -105,13 +85,13 @@ This plugin is available on [LuaRocks]:
 [packer.nvim]
 
 ```lua
-use 'freddiehaddad/feline.nvim'
+use 'Angalexik/feline.nvim'
 ```
 
 [vim-plug]
 
 ```vim
-Plug 'freddiehaddad/feline.nvim'
+Plug 'Angalexik/feline.nvim'
 ```
 
 ## Getting started
@@ -278,9 +258,6 @@ them was removed due to the link no longer being valid.**
 **[Config by Dharmx](https://gist.github.com/dharmx/47139967b0c4303572e3742af725300c)**
 ![image](https://user-images.githubusercontent.com/80379926/205459030-1ef38f4f-b364-43ea-876e-db98549c38cd.png)
 
-To share your configuration, start a discussion following this
-[example](https://github.com/freddiehaddad/feline.nvim/discussions/2).
-
 ## LICENSE
 
 Feline is licensed under GNU GPLv3. For more info, see: [LICENSE.md].
@@ -295,16 +272,15 @@ guess the name fits.
 [a patched font]: https://github.com/ryanoasis/nerd-fonts
 [built-in providers]: USAGE.md#default-providers
 [contributing]: CONTRIBUTING.md
-[feline.lua]: https://github.com/freddiehaddad/nvim/blob/main/lua/plugins/feline.lua
+[feline.lua]: https://github.com/Angalexik/nvim/blob/main/lua/plugins/feline.lua
 [gitsigns.nvim]: https://github.com/lewis6991/gitsigns.nvim/
-[issue]: https://github.com/freddiehaddad/feline.nvim/issues
+[issue]: https://github.com/Angalexik/feline.nvim/issues
 [issue or pull request]: CONTRIBUTING.md
 [lazy.nvim]: https://github.com/folke/lazy.nvim
 [license.md]: LICENSE.md
-[luarocks]: https://luarocks.org/modules/freddiehaddad/feline.nvim
 [neovim's built-in lsp]: https://neovim.io/doc/user/lsp.html
 [nvim-web-devicons]: https://github.com/kyazdani42/nvim-web-devicons/
 [packer.nvim]: https://github.com/wbthomason/packer.nvim/
-[repo]: https://github.com/freddiehaddad/nvim
+[repo]: https://github.com/Angalexik/nvim
 [usage]: USAGE.md
 [vim-plug]: https://github.com/junegunn/vim-plug/

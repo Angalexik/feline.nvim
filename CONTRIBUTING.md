@@ -21,7 +21,7 @@ Feline:
 ### Bug reports
 
 Facing an annoying bug that you want fixed?
-[Open a Bug Report](https://github.com/freddiehaddad/feline.nvim/issues/new/choose).
+[Open a Bug Report](https://github.com/Angalexik/feline.nvim/issues/new/choose).
 
 When you open a bug report, please make sure to provide all the information that
 the Issue template asks for since lack of information can make it hard for us to
@@ -33,7 +33,7 @@ you're reporting hasn't already been reported before.
 ### Feature requests
 
 Want to request a new feature that you think is necessary?
-[Open a Feature Request](https://github.com/freddiehaddad/feline.nvim/issues/new/choose).
+[Open a Feature Request](https://github.com/Angalexik/feline.nvim/issues/new/choose).
 
 Please avoid asking for features that aren't necessary or features that go
 against Feline's design goals of minimalism and leaving most things to the user.
@@ -45,7 +45,7 @@ feature request hasn't already been discussed or is currently in discussion.
 
 Notice a typo or grammatical error in the documentation? Find some of the
 documentation too vague and want further clarification?
-[Ask for a Documentation Improvement](https://github.com/freddiehaddad/feline.nvim/issues/new/choose).
+[Ask for a Documentation Improvement](https://github.com/Angalexik/feline.nvim/issues/new/choose).
 
 ### Pull Requests
 
