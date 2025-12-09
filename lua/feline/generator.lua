@@ -282,24 +282,24 @@ local function parse_icon(gen, icon, parent_hl, is_component_empty)
 end
 
 -- Parse component provider to return the provider string and default icon
-local function parse_provider(gen, provider, component, is_short, winid, section_nr, component_nr)
-    local str = ''
+local function parse_provider(gen, provider, component, is_short, winid, section_nr, component_nr, parent_hl)
+    local content = ''
     local icon
 
     -- If provider is a string and its name matches the name of a registered provider, use it
     if type(provider) == 'string' then
         if feline.providers[provider] then
-            str, icon = feline.providers[provider](component, {})
+            content, icon = feline.providers[provider](component, {})
         else
-            str = provider
+            content = provider
         end
 
-        return str, icon
+        return content, icon
     end
 
     -- If provider is a function, just evaluate it normally
     if type(provider) == 'function' then
-        str, icon = provider(component)
+        content, icon = provider(component)
     -- If provider is a table, get the provider name and opts and evaluate the provider
     elseif type(provider) == 'table' then
         local provider_fn, provider_opts
@@ -325,7 +325,7 @@ local function parse_provider(gen, provider, component, is_short, winid, section
         local update = evaluate_if_function(provider.update)
 
         if update == nil then
-            str, icon = provider_fn(component, provider_opts)
+            content, icon = provider_fn(component, provider_opts)
         else
             local provider_cache_tbl
 
@@ -393,17 +393,30 @@ local function parse_provider(gen, provider, component, is_short, winid, section
                 end
             end
 
-            str = provider_cache_tbl[winid][section_nr][component_nr].str
+            content = provider_cache_tbl[winid][section_nr][component_nr].str
             icon = provider_cache_tbl[winid][section_nr][component_nr].icon
         end
     end
 
-    if type(str) ~= 'string' then
+    local str = ''
+    if type(content) == 'string' then
+        str = content
+    elseif vim.islist(content) then
+        for _, value in ipairs(content) do
+            if type(value) == 'string' then
+                str = str .. value
+            elseif type(value) == 'table' then
+                str = str .. string.format('%%#%s#%s', get_hlname(gen, value.hl, parent_hl), value.str or '')
+            end
+        end
+    end
+
+    if type(content) ~= 'string' and type(content) ~= 'table' then
         api.nvim_err_writeln(
             string.format("Provider must evaluate to string, got type '%s' instead", type(provider))
         )
 
-        str = ''
+        content = ''
     end
 
     return str, icon
@@ -452,7 +465,8 @@ local function parse_component(gen, component, use_short_provider, winid, sectio
             use_short_provider,
             winid,
             section_nr,
-            component_nr
+            component_nr,
+            hl
         )
     else
         str = ''
